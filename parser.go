@@ -92,15 +92,25 @@ func ParseUnifiedDiff(diffText string) (*FileDiff, error) {
 			oldLineNo++
 			newLineNo++
 		case strings.HasPrefix(line, "+"):
+			if strings.HasPrefix(line, "\\ No newline at end of file") {
+				continue
+			}
 			change.Type = Added
 			change.Content = line[1:]
 			change.NewLine = newLineNo
 			newLineNo++
 		case strings.HasPrefix(line, "-"):
+			if strings.HasPrefix(line, "\\ No newline at end of file") {
+				continue
+			}
 			change.Type = Removed
 			change.Content = line[1:]
 			change.OldLine = oldLineNo
 			oldLineNo++
+		default:
+			if strings.HasPrefix(line, "\\ No newline at end of file") {
+				continue
+			}
 		}
 
 		currentHunk.Changes = append(currentHunk.Changes, change)
@@ -114,15 +124,23 @@ func ParseUnifiedDiff(diffText string) (*FileDiff, error) {
 }
 
 func parseHunkHeader(header string) (*Hunk, error) {
-	matches := regexp.MustCompile(`@@ -(\d+),(\d+) \+(\d+),(\d+) @@(.*)$`).FindStringSubmatch(header)
+	matches := regexp.MustCompile(`@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@(.*)$`).FindStringSubmatch(header)
 	if matches == nil {
 		return nil, fmt.Errorf("invalid hunk header format")
 	}
 
 	oldStart, _ := strconv.Atoi(matches[1])
-	oldCount, _ := strconv.Atoi(matches[2])
+	oldCount := 1
+	if matches[2] != "" {
+		oldCount, _ = strconv.Atoi(matches[2])
+	}
+
 	newStart, _ := strconv.Atoi(matches[3])
-	newCount, _ := strconv.Atoi(matches[4])
+	newCount := 1
+	if matches[4] != "" {
+		newCount, _ = strconv.Atoi(matches[4])
+	}
+
 	context := ""
 	if len(matches) > 5 {
 		context = strings.TrimSpace(matches[5])

@@ -1,5 +1,7 @@
 # go-pretty-diff
 I couldn't find a good library for generating pretty HTML diffs in Go, so I decided to write my own.
+![CleanShot 2025-01-15 at 19 51 56](https://github.com/user-attachments/assets/27e1b856-5d14-4fbc-8ff4-dffc2971921e)
+
 
 ## Installation
 

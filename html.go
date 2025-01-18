@@ -78,11 +78,15 @@ const (
         width: 40px;
         text-align: right;
         color: #6a737d;
+        flex-shrink: 0;
       }
 
       .line_content {
         flex: 1;
         padding-left: 10px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
       }
 
       .added {

@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"html/template"
 	"strings"
+
+	"github.com/tdewolff/minify/v2"
+	"github.com/tdewolff/minify/v2/css"
+	"github.com/tdewolff/minify/v2/html"
 )
 
 const (
@@ -265,5 +269,15 @@ func GenerateHTML(diffs ...*FileDiff) (string, error) {
 		return "", fmt.Errorf("failed to execute template: %v", err)
 	}
 
-	return output.String(), nil
+	// Minify the output HTML
+	m := minify.New()
+	m.AddFunc("text/css", css.Minify)
+	m.AddFunc("text/html", html.Minify)
+
+	minified, err := m.String("text/html", output.String())
+	if err != nil {
+		return "", fmt.Errorf("failed to minify HTML: %v", err)
+	}
+
+	return minified, nil
 }
